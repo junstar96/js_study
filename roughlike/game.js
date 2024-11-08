@@ -2,7 +2,8 @@ import chalk from 'chalk';
 import figlet from 'figlet';
 import readlineSync from 'readline-sync';
 
-const wait = (timer) => new Promise((resolve) => {setTimeout(function(){resolve(null)}, timer);})
+
+export const wait = (timer) => new Promise((resolve) => {setTimeout(function(){resolve(null)}, timer);})
 
 //도망치면 아이템 획득은 할 수 없다.
 class Player {
@@ -86,9 +87,9 @@ class Player {
   get_status(value) {
     //value는 0부터 6까지 존재한다고 하자.
     let rand_type = value;
-    if(typeof value !== 'number' || value < 0 || value > 6)
+    if(typeof value !== 'number' || value < 0 || value > 5)
     {
-      rand_type = Math.floor(Math.random()*7);
+      rand_type = Math.floor(Math.random()*6);
     }
 
 
@@ -178,7 +179,7 @@ class Player {
   Checking_Defence(damage)
   {
     let check_def = Checking_Per(this._defence);
-    if(!check)
+    if(!check_def)
     {
        this.damaged(damage * 0.5);
     }
@@ -332,10 +333,11 @@ class Monster {
 
 }
 
+
+
 class Boss extends Monster {
-  constructor(hp, attack, defence, speed, time) {
-    super(hp, attack, defence, speed, time);
-    this.name = "여긴 못지나간다파!";
+  constructor(current_level, current_stage) {
+    super(current_level, current_stage);
   }
 
   time_shorter() {
@@ -345,6 +347,16 @@ class Boss extends Monster {
     else {
       this._time = 5;
     }
+  }
+
+  SelectingType()
+  {
+    this._hp = this.setting_stat(200);
+    this._attack = this.setting_stat(20);
+    this._defence = this.setting_stat(20);
+    this._speed = this.setting_stat(10);
+    this._time = 10;
+    this._name = "여긴못지나간다파!";
   }
 }
 
@@ -359,16 +371,20 @@ function display_Get_Status(player) {
   console.log(chalk.magentaBright(`\n=== status_list ===`));
   console.log(
     chalk.blueBright(
-      `1 : 최대 체력 증가 \n 2 : 공격력 증가 \n 3 : 공격 배율 증가 \n 4 : 도망 확률 증가 \n 5 : 연속 공격 확률 증가 \n 6 : 방어 확률 증가`,
+      `1 : 최대 체력 증가 \n2 : 공격력 증가 \n3 : 공격 배율 증가 \n4 : 도망 확률 증가 \n5 : 연속 공격 확률 증가 \n6 : 방어 확률 증가`,
     )
   );
   console.log(chalk.magentaBright(`=====================\n`));
 }
 
-function displayStatus(stage, player, monster) {
+function displayStatus(level,stage, player, monster) {
   console.log(chalk.magentaBright(`\n=== Current Status ===`));
+  if(stage === 5)
+  {
+    console.log(chalk.yellow(`보스 스테이지!`));
+  }
   console.log(
-    chalk.cyanBright(`| Stage: ${stage} `) +
+    chalk.cyanBright(`|level : ${level} | Stage: ${stage} `) +
     chalk.blueBright(
       `| 플레이어 정보 | 체력 : ${player.hp} | 공격력 : ${player.attack} (공격 배율 : ${player.attack_mag}) | 방어력 : ${player.defence} | 도망 확률 : ${player.runaway} `,
     ) +
@@ -393,7 +409,7 @@ const Setting_after_battle = (check_time) => {
   );
 }
 
-const battle = async (stage, player, monster) => {
+const battle = async (level,stage, player, monster) => {
   let logs = [];
   let runaway_check = false;
 
@@ -403,7 +419,7 @@ const battle = async (stage, player, monster) => {
 
   while (player.hp > 0) {
     console.clear();
-    displayStatus(stage, player, monster);
+    displayStatus(level,stage, player, monster);
 
     logs.forEach((log) => console.log(log));
 
@@ -433,6 +449,7 @@ const battle = async (stage, player, monster) => {
         }
         else
         {
+          logs.push(chalk.red(`회피 실패!`));
           logs.push(monster.damaged(attack_point));
         }
         break;
@@ -443,7 +460,8 @@ const battle = async (stage, player, monster) => {
         }
         else
         {
-          logs.push(chalk.green(`데미지를 반으로 감소합니다.`));
+          logs.push(chalk.green(`데미지가 반으로 감소합니다.`));
+          logs.push(player.damaged(monster.attack/2));
         }
         break;
       case '4':
@@ -479,30 +497,29 @@ export async function startGame() {
   
 
   while (true) {
-    while (chepther_stage < 4) {
+    while (chepther_stage <= 4) {
       const monster = new Monster(chapther_level, chepther_stage);
       monster.SelectingType();
-      await battle(chepther_stage, player, monster);
+      await battle(chapther_level,chepther_stage, player, monster);
       player.healed();
-      let rand = 1;
-      console.log(rand);
-      player.get_status(rand);
-      await wait(2000);
+      console.clear();
+      display_Get_Status();
+      const choice = readlineSync.question('당신의 선택은? ');
+      player.get_status(choice);
       for(let timer = 3;timer > 0;timer--)
       {
         console.log(timer);
         Setting_after_battle(timer);
         await wait(1000);
       }
-
-      console.log("check");
       // 스테이지 클리어 및 게임 종료 조건
       //게임이 클리어 되면 chapter_level이 올라감
       //process.exit();
       chepther_stage++;
     }
     const boss = new Boss(chapther_level, chepther_stage);
-    await battle(chepther_stage, player, boss);
+    boss.SelectingType();
+    await battle(chapther_level,chepther_stage, player, boss);
     chepther_stage = 1;
     chapther_level++;
   }
@@ -512,6 +529,16 @@ export async function startGame() {
 
 export async function OptionSetting() {
   console.clear();
+
+  console.log(
+    chalk.cyan(
+      figlet.textSync(`난이도 설정: ${check_time}`, {
+        font: 'Standard',
+        horizontalLayout: 'default',
+        verticalLayout: 'default'
+      })
+    )
+  );
 }
 
 function Checking_Per(value)
@@ -519,3 +546,4 @@ function Checking_Per(value)
   let rand = Math.floor(Math.random()*100);
   return rand < value ? true : false;
 }
+

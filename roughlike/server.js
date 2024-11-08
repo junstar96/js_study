@@ -2,6 +2,7 @@ import chalk from 'chalk';
 import figlet from 'figlet';
 import readlineSync from 'readline-sync';
 import {startGame} from "./game.js";
+import {start_MiniGame} from "./minigame.js"
 
 // 로비 화면을 출력하는 함수
 function displayLobby() {
@@ -46,6 +47,7 @@ function displayLobby() {
 function handleUserInput() {
     const choice = readlineSync.question('확인: ');
 
+
     switch (choice) {
         case '1':
             console.log(chalk.green('게임을 시작합니다.'));
@@ -53,9 +55,9 @@ function handleUserInput() {
             startGame();
             break;
         case '2':
-            console.log(chalk.yellow('구현 준비중입니다.. 게임을 시작하세요'));
-            // 업적 확인하기 로직을 구현
-            handleUserInput();
+            console.log(chalk.yellow('미니게임 테스트!'));
+            start_MiniGame();
+            //미니 게임 테스트
             break;
         case '3':
             console.log(chalk.blue('구현 준비중입니다.. 게임을 시작하세요'));
