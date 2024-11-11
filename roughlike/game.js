@@ -1,6 +1,7 @@
 import chalk from 'chalk';
 import figlet from 'figlet';
 import readlineSync from 'readline-sync';
+import { getinputwithtimeout_without_ReadlineSync } from './readlinetest.js';
 
 
 export const wait = (timer) => new Promise((resolve) => {setTimeout(function(){resolve(null)}, timer);})
@@ -251,6 +252,11 @@ class Monster {
     return this._defence;
   }
 
+  get time()
+  {
+    return this._time;
+  }
+
   //get set 구역 끝
 
   setting_stat(value) {
@@ -265,7 +271,7 @@ class Monster {
         this._attack = this.setting_stat(5);
         this._defence = this.setting_stat(5);
         this._speed = this.setting_stat(10);
-        this._time = 100;
+        this._time = Math.max(40, Math.floor(100 / Math.ceil(this.stat_meg)));
         this._name = "TYPE:B";
         break;
       case 2://공격형
@@ -273,7 +279,7 @@ class Monster {
         this._attack = this.setting_stat(5);
         this._defence = this.setting_stat(5);
         this._speed = this.setting_stat(10);
-        this._time = 30;
+        this._time = Math.max(20, Math.floor(70 / Math.ceil(this.stat_meg)));
         this._name = "TYPE:A";
         break;
       case 3://방어형
@@ -281,7 +287,7 @@ class Monster {
         this._attack = this.setting_stat(5);
         this._defence = this.setting_stat(5);
         this._speed = this.setting_stat(10);
-        this._time = 200;
+        this._time = Math.max(50, Math.floor(200 / Math.ceil(this.stat_meg)));
         this._name = "TYPE:D";
         break;
       case 4://연속 공격형
@@ -289,7 +295,7 @@ class Monster {
         this._attack = this.setting_stat(10);
         this._defence = this.setting_stat(5);
         this._speed = this.setting_stat(50);
-        this._time = 50;
+        this._time = Math.max(20, Math.floor(70 / Math.ceil(this.stat_meg)));
         this._name = "TYPE:S";
         break;
       case 5://시간 제한형
@@ -297,7 +303,7 @@ class Monster {
         this._attack = this.setting_stat(3);
         this._defence = this.setting_stat(3);
         this._speed = this.setting_stat(30);
-        this._time = 10;
+        this._time = Math.max(5, Math.floor(30 / Math.ceil(this.stat_meg)));
         this._name = "TYPE:T";
         break;
     }
@@ -341,8 +347,8 @@ class Boss extends Monster {
   }
 
   time_shorter() {
-    if (this._time > 5) {
-      this._time = this._time - 5;
+    if (this._time > 3) {
+      this._time = this._time / 2;
     }
     else {
       this._time = 5;
@@ -419,16 +425,26 @@ const battle = async (level,stage, player, monster) => {
 
   while (player.hp > 0) {
     console.clear();
+    if (typeof monster.time_shorter !== "undefined") {
+      logs.push(chalk.green(`${monster.name}의 행동 속도가 빨라졌습니다!`))
+      monster.time_shorter();
+
+    }
     displayStatus(level,stage, player, monster);
 
     logs.forEach((log) => console.log(log));
 
     console.log(
       chalk.green(
-        `\n1. 공격한다 2. 연속 공격(${player.attack_mag}%). 3. 방어한다(${player.defence}%).4.도망친다.  `,
+        `\n1. 공격한다 2. 연속 공격(${player.attack_mag}%). 3. 방어한다(${player.defence}%).4.도망친다.  시간 제한 : ${monster.time} 초`,
       ),
     );
-    const choice = readlineSync.question('당신의 선택은? ');
+    //const choice = readlineSync.question('당신의 선택은? ');
+    const choice = await getinputwithtimeout_without_ReadlineSync(`당신의 선택은? :`, monster.time * 1000, "fail");
+    console.log(choice);
+
+    await wait(3000);
+
     logs_update();
 
     // 플레이어의 선택에 따라 다음 행동 처리
@@ -437,6 +453,7 @@ const battle = async (level,stage, player, monster) => {
     switch (choice) {
       case '1':
         logs.push(monster.damaged(player.attack));
+        logs.push(player.damaged(monster.attack));
         break;
       case '2':
         let input_string;
@@ -452,6 +469,7 @@ const battle = async (level,stage, player, monster) => {
           logs.push(chalk.red(`회피 실패!`));
           logs.push(monster.damaged(attack_point));
         }
+        logs.push(player.damaged(monster.attack));
         break;
       case '3':
         if(player.Checking_Defence(monster.attack))
@@ -471,13 +489,13 @@ const battle = async (level,stage, player, monster) => {
         }
         else {
           logs.push(chalk.yellow(`도망에 실패했습니다.`));
+          logs.push(player.damaged(monster.attack));
         }
         break;
-    }
-
-    if (typeof monster.time_shorter !== "undefined") {
-      monster.time_shorter();
-
+      default:
+        logs.push(chalk.red(`입력에 실패했습니다.`));
+        logs.push(player.damaged(monster.attack));
+        break;
     }
 
     if (runaway_check) {
