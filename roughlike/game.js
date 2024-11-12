@@ -25,6 +25,8 @@ class Player {
 
     //아이템 추가 획득 확률
     this._plus_item_get = 30;
+
+    this._player_is_dying = false;
   }
 
   //get set 영역 시작 
@@ -75,6 +77,11 @@ class Player {
 
   get attack_mag() {
     return this._attack_mag;
+  }
+
+  get player_is_dying()
+  {
+    return this._player_is_dying;
   }
 
   //get set 영역 끝
@@ -158,16 +165,16 @@ class Player {
     this._hp -= damage;
 
     if (this._hp <= 0) {
-      this.died();
+      return this.died();
     }
     else {
-      console.log(chalk.green(`${damage}를 입었습니다.`));
-      return chalk.green(`${damage}를 입었습니다.`);
+      return chalk.green(`${damage}의 피해를 입었습니다.`);
     }
   }
   //죽었을 때
   died() {
     //당장은 게임 종료로 해두지만 나중에는 다른 걸로 바꿔 보도록 하자.
+    this._player_is_dying = true;
     return chalk.green(`사망했습니다.`)
 
 
@@ -225,9 +232,15 @@ class Monster {
     this._speed = 10;
     this._time = 100;
     this._name;
+    this._monster_dead = false;
   }
 
   //get set 구역 시작
+  get monster_dead()
+  {
+    return this._monster_dead;
+  }
+
   get hp() {
     return this._hp;
   }
@@ -269,7 +282,7 @@ class Monster {
       case 1://밸런스
         this._hp = this.setting_stat(100);
         this._attack = this.setting_stat(5);
-        this._defence = this.setting_stat(5);
+        this._defence = this.setting_stat(2);
         this._speed = this.setting_stat(10);
         this._time = Math.max(40, Math.floor(100 / Math.ceil(this.stat_meg)));
         this._name = "TYPE:B";
@@ -277,14 +290,14 @@ class Monster {
       case 2://공격형
         this._hp = this.setting_stat(100);
         this._attack = this.setting_stat(5);
-        this._defence = this.setting_stat(5);
+        this._defence = this.setting_stat(2);
         this._speed = this.setting_stat(10);
         this._time = Math.max(20, Math.floor(70 / Math.ceil(this.stat_meg)));
         this._name = "TYPE:A";
         break;
       case 3://방어형
         this._hp = this.setting_stat(100);
-        this._attack = this.setting_stat(5);
+        this._attack = this.setting_stat(3);
         this._defence = this.setting_stat(5);
         this._speed = this.setting_stat(10);
         this._time = Math.max(50, Math.floor(200 / Math.ceil(this.stat_meg)));
@@ -292,7 +305,7 @@ class Monster {
         break;
       case 4://연속 공격형
         this._hp = this.setting_stat(100);
-        this._attack = this.setting_stat(10);
+        this._attack = this.setting_stat(3);
         this._defence = this.setting_stat(5);
         this._speed = this.setting_stat(50);
         this._time = Math.max(20, Math.floor(70 / Math.ceil(this.stat_meg)));
@@ -319,16 +332,17 @@ class Monster {
 
     this._hp -= damage;
     if (this._hp <= 0) {
-      this.died();
+      return this.died();
     }
     else {
-      return chalk.green(`${damage}를 입혔습니다.`)
+      return chalk.green(`${damage}의 피해를 입혔습니다.`)
     }
   }
 
   //캐릭터가 죽었을 때
   died() {
-    console.log(`${this._name}를 쓰러트렸습니다.`);
+    this._monster_dead = true;
+    return chalk.green(`${this._name}를 쓰러트렸습니다.`)
 
   }
 
@@ -441,9 +455,8 @@ const battle = async (level,stage, player, monster) => {
     );
     //const choice = readlineSync.question('당신의 선택은? ');
     const choice = await getinputwithtimeout_without_ReadlineSync(`당신의 선택은? :`, monster.time * 1000, "fail");
-    console.log(choice);
 
-    await wait(3000);
+  
 
     logs_update();
 
@@ -502,6 +515,13 @@ const battle = async (level,stage, player, monster) => {
       break;
     }
 
+    if(player.player_is_dying)
+    {
+      console.log("플레이어가 사망했으므로 게임을 종료합니다.")
+      wait(5000);
+      process.exit();
+    }
+
 
   }
 
@@ -512,6 +532,7 @@ export async function startGame() {
   const player = new Player();
   let chapther_level = 1;
   let chepther_stage = 1;
+
   
 
   while (true) {
@@ -540,6 +561,11 @@ export async function startGame() {
     await battle(chapther_level,chepther_stage, player, boss);
     chepther_stage = 1;
     chapther_level++;
+
+    
+
+    
+
   }
 
 

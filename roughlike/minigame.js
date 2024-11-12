@@ -1,6 +1,5 @@
 import chalk from 'chalk';
 import figlet from 'figlet';
-import readlineSync from 'readline-sync';
 import { getinputwithtimeout_without_ReadlineSync } from './readlinetest.js';
 
 export const wait = (timer) => new Promise((resolve) => { setTimeout(function () { resolve(null) }, timer); })
@@ -38,20 +37,29 @@ class miniGame {
     }
 
     async Start_game() {
+        let logs;
+        let is_win;
+
+        this._type = Math.floor(Math.random()*3);
+
         switch (this._type) {
             //숫자 맞추기 게임
             case 0:
-                await this.BoardGame();
+                [logs, is_win] = await this.BoardGame();
                 break;
             //가위 바위 보
             case 1:
-                await this.Rock_Scissors_Paper();
+                [logs, is_win] = await this.Rock_Scissors_Paper();
                 break;
             //참참참
             case 2:
-                await this.Charm3();
+                [logs, is_win] = await this.Charm3();
                 break;
         }
+
+        console.log(logs);
+        return is_win;
+
     }
 
     Finding_num() {
@@ -59,6 +67,7 @@ class miniGame {
     }
 
     async BoardGame() {
+        let logs = [];
         let board = [
             [0, -1, 0, -1, 0],
             [-2, -2, -2, -2, -2],
@@ -68,55 +77,103 @@ class miniGame {
 
         ];
 
-        let player_set = new Set();
-        let computer_set = new Set();
+        let dx_board = [-2, 0, 2, 0];
+        let dy_board = [0, -2, 0, 2];
 
-        function Rand_Com_input()
-        {
+        let Check_set = new Set();
+
+        async function Rand_Com_input() {
             let rand = Math.ceil(Math.random() * 9);
 
-            while(!computer_set.has(rand) && !player_set.has(rand))
-            {
+
+            while (Check_set.has(rand)) {
                 rand = Math.ceil(Math.random() * 9);
             }
 
-
-            switch (Number(rand)) {
+            switch (rand) {
                 case 1:
-                    board[4][0] = 'X';
+                    board[4][0] = -3;
                     break;
                 case 2:
-                    board[4][2] = 'X';
+                    board[4][2] = -3;
                     break;
                 case 3:
-                    board[4][4] = 'X';
+                    board[4][4] = -3;
                     break;
                 case 4:
-                    board[2][0] = 'X';
+                    board[2][0] = -3;
                     break;
                 case 5:
-                    board[2][2] = 'X';
+                    board[2][2] = -3;
                     break;
                 case 6:
-                    board[2][4] = 'X';
+                    board[2][4] = -3;
                     break;
                 case 7:
-                    board[0][0] = 'X';
+                    board[0][0] = -3;
                     break;
                 case 8:
-                    board[0][2] = 'X';
+                    board[0][2] = -3;
                     break;
                 case 9:
-                    board[0][4] = 'X';
+                    board[0][4] = -3;
                     break;
             }
 
-            computer_set.add(rand);
+            Check_set.add(rand);
+        }
+
+        async function board_winning_check() {
+            let count = 0;
+            for (let i = 0; i < board.length; i += 2) {
+                for (let j = 0; j < board[0].length; j += 2) {
+                    if (board[i][j] === 0) {
+                        count++;
+                    }     
+                }
+            }
+
+            if(board[0][0] + board[0][2] + board[0][4] === 9 ||
+                board[2][0] + board[2][2] + board[2][4] === 9 ||
+                board[4][0] + board[4][2] + board[4][4] === 9 ||
+                board[0][0] + board[2][2] + board[4][4] === 9 ||
+                board[0][0] + board[2][0] + board[4][0] === 9 ||
+                board[0][2] + board[2][2] + board[4][2] === 9 ||
+                board[0][4] + board[2][4] + board[4][4] === 9 ||
+                board[0][4] + board[2][2] + board[4][0] === 9
+             )
+            {
+                console.log("이겼습니다!");
+                return true;
+            }
+            else if(board[0][0] + board[0][2] + board[0][4] === -9 ||
+                board[2][0] + board[2][2] + board[2][4] === -9 ||
+                board[4][0] + board[4][2] + board[4][4] === -9 ||
+                board[0][0] + board[2][2] + board[4][4] === -9 ||
+                board[0][0] + board[2][0] + board[4][0] === -9 ||
+                board[0][2] + board[2][2] + board[4][2] === -9 ||
+                board[0][4] + board[2][4] + board[4][4] === -9 ||
+                board[0][4] + board[2][2] + board[4][0] === -9
+             )
+            {
+                console.log("졌습니다!");
+                return true;
+            }
+
+            if (count !== 0) {
+                return false;
+            }
+            else {
+                console.log("보드가 다 찼습니다!");
+                return true;
+            }
         }
 
         while (true) {
             console.clear();
-            console.log(
+            logs = [];//logs 내용물 초기화
+
+            logs.push(
                 chalk.cyan(
                     figlet.textSync('Tic tac toe', {
                         font: 'Swamp Land',
@@ -140,61 +197,78 @@ class miniGame {
                         case 0:
                             field += " ";
                             break
+                        case 3:
+                            field += "O";
+                            break;
+                        case -3:
+                            field += "X";
+                            break;
                         default:
                             field += String(board[i][j]);
                             break;
                     }
                 }
-                console.log(field);
+                logs.push(field);
             }
 
             const line = chalk.magentaBright('='.repeat(50));
-            console.log(line);
-            console.log(chalk.blue('틱택토!!'));
-            console.log(chalk.white('7 | 8 | 9'));
-            console.log(chalk.white('4 | 5 | 6'));
-            console.log(chalk.white('1 | 2 | 3'));
+            logs.push(line);
+            logs.push(chalk.blue('틱택토!!'));
+            logs.push(chalk.white('7 | 8 | 9'));
+            logs.push(chalk.white('4 | 5 | 6'));
+            logs.push(chalk.white('1 | 2 | 3'));
+
+            
+            logs.forEach((log) => console.log(log));
 
 
-
-            let input_num = await getinputwithtimeout_without_ReadlineSync("숫자를 입력하세요(제한 시간 5초). ", 5000, "Fail!");
+            let input_num = await getinputwithtimeout_without_ReadlineSync("숫자를 입력하세요(제한 시간 5초). ", 50000, "Fail!");
 
             switch (Number(input_num)) {
                 case 1:
-                    board[4][0] = 'O';
+                    board[4][0] = 3;
                     break;
                 case 2:
-                    board[4][2] = 'O';
+                    board[4][2] = 3;
                     break;
                 case 3:
-                    board[4][4] = 'O';
+                    board[4][4] = 3;
                     break;
                 case 4:
-                    board[2][0] = 'O';
+                    board[2][0] = 3;
                     break;
                 case 5:
-                    board[2][2] = 'O';
+                    board[2][2] = 3;
                     break;
                 case 6:
-                    board[2][4] = 'O';
+                    board[2][4] = 3;
                     break;
                 case 7:
-                    board[0][0] = 'O';
+                    board[0][0] = 3;
                     break;
                 case 8:
-                    board[0][2] = 'O';
+                    board[0][2] = 3;
                     break;
                 case 9:
-                    board[0][4] = 'O';
+                    board[0][4] = 3;
                     break;
                 default:
-                    console.log("입력 실패!")
+                    logs.push("입력 실패!")
                     break;
             }
 
-            player_set.add(input_num);
-            Rand_Com_input();
+            Check_set.add(Number(input_num));
+
+            if (await board_winning_check()) {
+                console.log("게임 종료");
+                return this.winCheck(true);
+            }
+            
+            await Rand_Com_input();
+            
         }
+
+
 
 
     }
@@ -240,7 +314,7 @@ class miniGame {
                 }
             }
 
-            let check_arrow = await getinputwithtimeout_without_ReadlineSync("입력 : ", 3000, default_value);
+            let check_arrow = await getinputwithtimeout_without_ReadlineSync("입력(10초) : ", 10000, default_value);
             let hand;
 
             switch (check_arrow) {
@@ -269,55 +343,32 @@ class miniGame {
                 switch (rand) {
                     case 0:
                         if (hand === 1) {
-                            console.log(chalk.blue('이김!'));
+                            return this.winCheck(true);
                         }
                         else {
-                            console.log(chalk.blue('짐!'));
+                            return this.winCheck(false);
                         }
                         break;
                     case 1:
                         if (hand === 2) {
-                            console.log(chalk.blue('이김!'));
+                            return this.winCheck(true);
                         }
                         else {
-                            console.log(chalk.blue('짐!'));
+                            return this.winCheck(false);
                         }
                         break;
                     case 2:
                         if (hand === 0) {
-                            console.log(chalk.blue('이김!'));
+                            return this.winCheck(true);
                         }
                         else {
-                            console.log(chalk.blue('짐!'));
+                            return this.winCheck(true);
                         }
                         break;
                 }
             }
 
-            await wait(3000);
 
-
-
-            //멈춘 게 해결되고 난 뒤
-            // if (arrow === rand) {
-            //     if (turn_check === true) {
-            //         console.log(chalk.blue('공격 성공!'));
-            //     }
-            //     else {
-            //         console.log(chalk.blue('패배!'));
-            //     }
-            //     break;
-            // }
-            // else {
-            //     if (turn_check === true) {
-            //         console.log(chalk.blue('공격 실패! 상대에게 턴이 넘어갑니다.'));
-            //     }
-            //     else {
-            //         console.log(chalk.blue('잘 피하셨어요! 턴을 가져옵니다.'));
-            //     }
-            //     await wait(1000);
-            //     turn_check = !turn_check;
-            // }
         }
     }
 
@@ -348,8 +399,8 @@ class miniGame {
                 console.log(chalk.blue('상대의 턴! 잘 피하세요!'));
             }
             console.log(chalk.white('방향을 입력하세요.'));
-            console.log(chalk.white('입력 : 화살표 <= =>'));
-            let check_arrow = await getinputwithtimeout_without_ReadlineSync("입력은? : ", 3000, "A");
+            console.log(chalk.white('입력 (A : 왼쪽 D : 오른쪽)'));
+            let check_arrow = await getinputwithtimeout_without_ReadlineSync("입력은? (입력 제한 10초) : ", 10000, "A");
             let arrow;
 
             switch (check_arrow) {
@@ -366,10 +417,10 @@ class miniGame {
             //멈춘 게 해결되고 난 뒤
             if (arrow === rand) {
                 if (turn_check === true) {
-                    console.log(chalk.blue('공격 성공!'));
+                    return this.winCheck(true);
                 }
                 else {
-                    console.log(chalk.blue('패배!'));
+                    return this.winCheck(false);
                 }
                 break;
             }
@@ -400,11 +451,21 @@ class miniGame {
 export async function start_MiniGame() {
     console.clear();
     const minigame = new miniGame(0);
+    
 
 
     while (true) {
-        await minigame.Start_game();
-        await wait(2000);
+        if(await minigame.Start_game())
+        {
+            let restart = await getinputwithtimeout_without_ReadlineSync("게임을 다시 하시겠습니까? (Y/N)", 10000, 'N');
+            switch(restart)
+            {
+                case 'N':
+                case 'n':
+                    return true;
+                    break;
+            }
+        }
     }
 
 

@@ -44,19 +44,27 @@ function displayLobby() {
 }
 
 // 유저 입력을 받아 처리하는 함수
-function handleUserInput() {
+async function handleUserInput() {
+    displayLobby();
+
     const choice = readlineSync.question('확인: ');
 
 
     switch (choice) {
         case '1':
-            console.log(chalk.green('게임을 시작합니다.'));
+            if(await startGame())
+            {
+                handleUserInput();
+            }
             // 여기에서 새로운 게임 시작 로직을 구현
             startGame();
             break;
         case '2':
             console.log(chalk.yellow('미니게임 테스트!'));
-            start_MiniGame();
+            if(await start_MiniGame())
+            {
+                handleUserInput();
+            }
             //미니 게임 테스트
             break;
         case '3':
@@ -77,7 +85,6 @@ function handleUserInput() {
 
 // 게임 시작 함수
 function start() {
-    displayLobby();
     handleUserInput();
 }
 

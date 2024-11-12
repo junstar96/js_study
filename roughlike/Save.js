@@ -2,9 +2,6 @@
 //blob : 멀티미디어 옵션을 체크하는 데 도움 주는 클래스. 
 import fs from "fs";
 import path, { resolve } from "path";
-import readlineSync from 'readline-sync';
-import { wait } from './minigame';
-
 //현재 위치를 받아온다.
 const __dirname = path.resolve();
 
