@@ -5,7 +5,7 @@ import * as ev from "events";
 //이벤트 핸들러를 준다. readline도 깊게 들어가면 이 쪽에 가깝다.
 
 const myemitter = new ev.EventEmitter();
-myemitter.on('myevnet', ()=>{console.log("hello world")});
+myemitter.on('myevent', ()=>{console.log("hello world")});
 
 
 const rl = readline.createInterface(
@@ -15,4 +15,5 @@ const rl = readline.createInterface(
     }
 )
 
-myemitter.emit('myevent');
+myemitter.once('myevent');
+console.log("find him");

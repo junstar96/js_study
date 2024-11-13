@@ -16,3 +16,4 @@ const rl = readline.createInterface(
 )
 
 myemitter.emit('myevent');
+console.log("find him");

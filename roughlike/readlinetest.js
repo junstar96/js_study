@@ -28,11 +28,10 @@ async function GetinputWithTimeout_withRace(question, timeout, defaultValue) {
             }, timeout);
         }),
 
-        new Promise((resolve) => {
-            setTimeout(() => {
-                console.log("타임 인!");
-                resolve(defaultValue + defaultValue);
-            }, timeout * 0.5);
+        new Promise((resolve)=>
+        {
+            let userinput = readlineSync.question(question);
+            resolve(userinput);
         })
         ]
     )
@@ -54,7 +53,7 @@ export async function getinputwithtimeout_without_ReadlineSync(question, timeout
         process.stdin.resume();
         process.stdout.write(question);
 
-        process.stdin.on('data', (data) => {
+        process.stdin.once('data', (data) => {
             if (!inputReceived) {
                 inputReceived = true;
                 clearTimeout(timer);

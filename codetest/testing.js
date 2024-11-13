@@ -1,40 +1,62 @@
-//큰 숫자를 쓸 때 해볼 방법
-// let check_num = [1,2,3,4]
 
-// console.log(Number(check_num.join("")));
 
-//왜 틀렸을까 보자.
+// function solution(s) {
+//     var answer = 0;
 
-function solution(sizes) {
-    var answer = 0;
-    let max_x = 0;
-    let max_y = 0;
+//     const Num = {
+//         "zero" : 0, "one" : 1, 
+//         "two" : 2, "three" : 3, 
+//         "four" : 4, "five" : 5, 
+//         "six" : 6, "seven" : 7, 
+//         "eight" : 8, "nine" : 9, 
+//     }
     
-    for(let i = 0;i<sizes.length;i++)
-        {
-            sizes[i].sort();
-        }
+    
+//     s = s.replace(/zero/g, 0);
+    
+//     s = s.replace(/one/g, 1);
+    
+//     s = s.replace(/two/g, 2);
+    
+//     s = s.replace(/three/g, 3);
+    
+//     s = s.replace(/four/g, 4);
+    
+//     s = s.replace(/five/g, 5);
+    
+//     s = s.replace(/six/g, 6);
+    
+//     s = s.replace(/seven/g, 7);
+    
+//     s = s.replace(/eight/g, 8);
+    
+//     s = s.replace(/nine/g, 9);
+    
 
-    console.log(sizes);
-    
-    for(let i = 0;i<sizes.length;i++)
-    {
-        if(sizes[i][0] >= max_x)
-            {
-                max_x = sizes[i][0];
-            }
-        
-        if(sizes[i][1] > max_y)
-            {
-                max_y = sizes[i][1];
-            }
-    }
-    
-    answer = max_x * max_y;
-    
-    
+//     answer = s;
+
+//     return answer;
+// }
+
+// console.log(Number(solution("one4seveneight")));
+
+//좀 더 심플하게 풀어보자.
+
+// let s = "hello world hello";
+// s = s.replace(/hello/g, 1);
+// 
+
+function solution(array, commands) {
+    var answer = [];
+
+    commands.forEach(data => {
+        let subarr = array.slice(data[0] - 1, data[1]);
+        subarr.sort();
+        answer.push(subarr[data[2] - 1]);
+    });
+
+
     return answer;
 }
 
-console.log(solution([[10, 20], [20, 10], [15, 15]]));
-
+console.log(solution([1, 5, 2, 6, 3, 7, 4], [[2, 5, 3], [4, 4, 1], [1, 7, 3]] ))
