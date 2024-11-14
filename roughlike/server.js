@@ -1,8 +1,10 @@
 import chalk from 'chalk';
 import figlet from 'figlet';
 import readlineSync from 'readline-sync';
-import {startGame} from "./game.js";
-import {start_MiniGame} from "./minigame.js"
+import { startGame } from "./game.js";
+import { start_MiniGame } from "./minigame.js";
+import { myemitter } from './event_connecter.js';
+import { return_rank_data } from './Save.js';
 
 // 로비 화면을 출력하는 함수
 function displayLobby() {
@@ -43,6 +45,35 @@ function displayLobby() {
     console.log(chalk.gray('1-4 사이의 수를 입력한 뒤 엔터를 누르세요.'));
 }
 
+function displayRank() {
+    console.clear();
+
+    let ranks = return_rank_data();
+    ranks.sort((a, b) => b['point'] - a['point'])
+
+    const line = chalk.magentaBright('='.repeat(50));
+    console.log(line);
+    ranks.forEach((element, index) => {
+        let point = element['point'];
+        console.log(chalk.blue(`|랭킹 ${index} 위: ${point}|`))
+    });
+    console.log(line);
+
+    const choice = readlineSync.question('뒤로 돌아가시겠습니까?(y/n) ');
+
+    switch (choice) {
+        case 'y':
+        case 'Y':
+            break;
+        case 'n':
+        case 'N':
+            displayRank();
+            break;
+        default:
+            break;
+    }
+}
+
 // 유저 입력을 받아 처리하는 함수
 async function handleUserInput() {
     displayLobby();
@@ -52,8 +83,7 @@ async function handleUserInput() {
 
     switch (choice) {
         case '1':
-            if(await startGame())
-            {
+            if (await startGame()) {
                 handleUserInput();
             }
             // 여기에서 새로운 게임 시작 로직을 구현
@@ -61,14 +91,13 @@ async function handleUserInput() {
             break;
         case '2':
             console.log(chalk.yellow('미니게임 테스트!'));
-            if(await start_MiniGame())
-            {
+            if (await start_MiniGame()) {
                 handleUserInput();
             }
             //미니 게임 테스트
             break;
         case '3':
-            console.log(chalk.blue('구현 준비중입니다.. 게임을 시작하세요'));
+            displayRank();
             // 옵션 메뉴 로직을 구현
             handleUserInput();
             break;
@@ -85,6 +114,10 @@ async function handleUserInput() {
 
 // 게임 시작 함수
 function start() {
+    myemitter.once('pause', () => {
+        console.log(`pause`);
+        process.exit();
+    });
     handleUserInput();
 }
 

@@ -352,7 +352,7 @@ class Monster {
         return chalk.green(`${this._name}의 방어력이 올라갑니다!`);
         break;
       case 2:
-        this._hp = Math.min(this._hp + this.setting_stat(10), this._max_hp);
+        this._hp = Math.min(Math.floor(this._hp + this.setting_stat(10)), this.stat_meg * 200);
         return chalk.green(`체력 회복!`);
         break;
     }
@@ -444,7 +444,8 @@ function displayStatus(level, stage, player, monster) {
     chalk.cyanBright(`|level : ${level} | Stage: ${stage} `) +
     chalk.blueBright(
       `| 플레이어 정보 | 체력 : (${player.hp} / ${player.max_hp}) | 공격력 : ${player.attack} (공격 배율 : ${player.attack_mag}) | 방어력 : ${player.defence}% | 도망 확률 : ${player.runaway}%`,
-    ) +
+    ) 
+    +
     chalk.redBright(
       `\n\n| 이름 : ${monster.name} | 체력 :  ${monster.hp} |공격력 : ${monster.attack} | 방어력 : ${monster.defence}`,
     ),
@@ -474,12 +475,14 @@ const battle = async (level, stage, player, monster) => {
   let commend_code = ["공격", "연속공격", "방어", "도망"]
   let monster_commend = "";
   let monster_input = 0;
+  let turn_check = 3; 
 
   function logs_update() {
     logs = [];
   }
 
   while (player.hp > 0) {
+    turn_check += 1;
     console.clear();
     if (typeof monster.time_shorter !== "undefined") {
       logs.push(chalk.green(`${monster.name}의 행동 속도가 빨라졌습니다!`))
@@ -492,7 +495,8 @@ const battle = async (level, stage, player, monster) => {
 
     console.log(
       chalk.green(
-        `1. 공격한다 2. 연속 공격(${player.attack_mag}%). 3. 방어한다(${player.defence}%).4.도망친다.  시간 제한 : ${monster.time} 초`,
+        `1. 공격한다 2. 연속 공격(${player.attack_mag}%). 3. 방어한다(${player.defence}%).4. 도망친다. ` + 
+        (turn_check >= 3 ? chalk.cyanBright(` 5. 행동 캔슬 `) : chalk.gray(` 5. 행동 캔슬(딜레이) `)) + `시간 제한 : ${monster.time} 초`,
       ),
     );
     //const choice = readlineSync.question('당신의 선택은? ');
@@ -603,6 +607,29 @@ const battle = async (level, stage, player, monster) => {
               logs.push(monster.nothing_worked());
               break;
           }
+        }
+        break;
+      case '5':
+        if(turn_check<3)
+        {
+          logs.push(chalk.yellow(`쿨타임 중이라 실패했습니다.`));
+          switch (monster_input) {
+            case 1:
+              logs.push(player.damaged(monster.attack));
+              break;
+            case 2:
+              logs.push(monster.buffed());
+              break;
+            case 3:
+              logs.push(monster.nothing_worked());
+              break;
+          }
+        }
+        else
+        {
+          logs.push(chalk.blue(`상대의 행동을 캔슬시켰습니다!`));
+          turn_check = 0;
+          logs.push(monster.damaged(1));
         }
         break;
       default:

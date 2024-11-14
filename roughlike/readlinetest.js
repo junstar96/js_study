@@ -1,4 +1,5 @@
 import readlineSync from 'readline-sync';
+import { myemitter } from './event_connecter.js';
 
 
 //결과 : 실패
@@ -28,8 +29,7 @@ async function GetinputWithTimeout_withRace(question, timeout, defaultValue) {
             }, timeout);
         }),
 
-        new Promise((resolve)=>
-        {
+        new Promise((resolve) => {
             let userinput = readlineSync.question(question);
             resolve(userinput);
         })
@@ -58,6 +58,17 @@ export async function getinputwithtimeout_without_ReadlineSync(question, timeout
                 inputReceived = true;
                 clearTimeout(timer);
                 const userinput = data.toString().trim();
+
+                //이벤트 관리자로 호출을 하도록 하는 건 가능한 것으로 판명.
+
+                if (userinput === 'pause' || userinput === 'Q' || userinput === 'q') {
+                    myemitter.emit('pause');
+                }
+
+
+
+
+
                 resolve(userinput);
                 process.stdin.pause();
             }
@@ -68,11 +79,5 @@ export async function getinputwithtimeout_without_ReadlineSync(question, timeout
 }
 
 
-// (async () => {
-//     const question = "입력값 : "
-//     const timeout = 5000;
-//     const defaultValue = "default";
 
-//     const result = await getinputwithtimeout_without_ReadlineSync(question, timeout, defaultValue);
-//     console.log("입력값 : " + result);
-// })();
+

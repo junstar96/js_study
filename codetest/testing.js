@@ -46,17 +46,42 @@
 // s = s.replace(/hello/g, 1);
 // 
 
-function solution(array, commands) {
+//K = 랭크 순
+function solution(k, score) {
     var answer = [];
+    let result = [];
 
-    commands.forEach(data => {
-        let subarr = array.slice(data[0] - 1, data[1]);
-        subarr.sort();
-        answer.push(subarr[data[2] - 1]);
-    });
+    
 
+    for(let i = 0;i<score.length;i++)
+    {
+        if(answer.length < k)
+        {
+            answer.push(score[i])
+            answer.sort((a,b) => b - a);
+        }
+        else
+        {
+            for(let j = 0;j<answer.length;j++)
+            {
+                if(answer[j] <= score[i])
+                {
+                    let front = answer.slice(0, j);
+                    let behind = answer.slice(j, -1);
+                    answer = [...front, score[i], ...behind];
+                    answer.sort((a,b) => b - a);
+                    break;
+                }
+            }
 
-    return answer;
+            
+        }
+
+        result.push(answer[answer.length-1]);
+    }
+    return result;
 }
 
-console.log(solution([1, 5, 2, 6, 3, 7, 4], [[2, 5, 3], [4, 4, 1], [1, 7, 3]] ))
+console.log(solution(3, [10, 100, 20, 150, 1, 100, 200]));
+//console.log(solution([1, 7, 1, 2]));
+
