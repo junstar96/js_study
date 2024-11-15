@@ -35,7 +35,7 @@ function displayLobby() {
     // 옵션들
     console.log(chalk.blue('1.') + chalk.white(' 새로운 게임 시작'));
     console.log(chalk.blue('2.') + chalk.white(' 미니게임 모드'));
-    console.log(chalk.blue('3.') + chalk.white(' 옵션'));
+    console.log(chalk.blue('3.') + chalk.white(' 랭킹 확인'));
     console.log(chalk.blue('4.') + chalk.white(' 종료'));
 
     // 하단 경계선
