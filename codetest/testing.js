@@ -10,28 +10,28 @@
 //         "six" : 6, "seven" : 7, 
 //         "eight" : 8, "nine" : 9, 
 //     }
-    
-    
+
+
 //     s = s.replace(/zero/g, 0);
-    
+
 //     s = s.replace(/one/g, 1);
-    
+
 //     s = s.replace(/two/g, 2);
-    
+
 //     s = s.replace(/three/g, 3);
-    
+
 //     s = s.replace(/four/g, 4);
-    
+
 //     s = s.replace(/five/g, 5);
-    
+
 //     s = s.replace(/six/g, 6);
-    
+
 //     s = s.replace(/seven/g, 7);
-    
+
 //     s = s.replace(/eight/g, 8);
-    
+
 //     s = s.replace(/nine/g, 9);
-    
+
 
 //     answer = s;
 
@@ -78,7 +78,7 @@
 //             }
 //         }
 
-        
+
 
 //         if(is_chaining)
 //             continue;
@@ -120,3 +120,53 @@
 // console.log(result);
 
 // console.log(solution("5525","1255"));
+
+function tominuite(data)
+{
+    const [h, m] = data.split(":");
+    return Number(h) * 60 + Number(m);
+}
+
+
+function solution(video_len, pos, op_start, op_end, commands) {
+    var answer = '';
+    let video_len_arr = tominuite(video_len);
+    let pos_arr = tominuite(pos);
+    let op_start_arr = tominuite(op_start);
+    let op_end_arr = tominuite(op_end);
+
+    if(pos_arr >= op_start_arr && pos_arr <= op_end_arr)
+        pos_arr = op_end_arr;
+
+    commands.forEach(data => {
+        let check = data === "next" ? 10 : -10;
+        pos_arr += check;
+
+        if(pos_arr < 0)
+            pos_arr = 0;
+
+        if(pos_arr > video_len_arr)
+        {
+            pos_arr = video_len_arr;
+        }
+
+
+        if(pos_arr >= op_start_arr && pos_arr <= op_end_arr)
+            pos_arr = op_end_arr;
+    });
+
+    const [h, w] = [Math.floor(pos_arr/60), pos_arr%60 >= 10? pos_arr%60 : `0${pos_arr%60}`];
+
+    answer = [h,w].join(":");
+
+    
+    return answer;
+}
+
+console.log(solution("34:33", "13:00", "00:55", "02:55", ["next", "prev"]))
+
+console.log(solution("10:55","00:05","00:15","06:55",["prev", "next", "next"]))
+
+console.log(solution("07:22","04:05","00:15","04:07",["next"]))
+
+
