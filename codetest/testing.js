@@ -46,42 +46,77 @@
 // s = s.replace(/hello/g, 1);
 // 
 
-//K = 랭크 순
-function solution(k, score) {
-    var answer = [];
-    let result = [];
+//글자 겹치는 거 지우기
+// function solution(babbling) {
+//     var answer = 0;
+//     let word_list = ["aya", "ye","woo","ma"];
 
-    
+//     for(let i = 0;i<babbling.length;i++)
+//     {
+//         let word = babbling[i];
+//         let is_chaining = false;
+//         for(let j = 0;j<word_list.length;j++)
+//         {
+//             if(word.includes(word_list[j] + word_list[j]))
+//             {
+//                 is_chaining = true;
+//                 break;
+//             }
+//         }
+//         let length_check = 2;
+//         while(length_check <= 3)
+//         {
+//             if(word.slice(0,length_check) === word_list[0] || word.slice(0,length_check) === word_list[1] ||
+//                word.slice(0,length_check) === word_list[2] || word.slice(0,length_check) === word_list[3])
+//             {
+//                 word = word.slice(length_check);
+//                 length_check = 2;
+//             }
+//             else
+//             {
+//                 length_check++;
+//             }
+//         }
 
-    for(let i = 0;i<score.length;i++)
-    {
-        if(answer.length < k)
-        {
-            answer.push(score[i])
-            answer.sort((a,b) => b - a);
-        }
-        else
-        {
-            for(let j = 0;j<answer.length;j++)
-            {
-                if(answer[j] <= score[i])
-                {
-                    let front = answer.slice(0, j);
-                    let behind = answer.slice(j, -1);
-                    answer = [...front, score[i], ...behind];
-                    answer.sort((a,b) => b - a);
-                    break;
-                }
-            }
+        
 
-            
-        }
+//         if(is_chaining)
+//             continue;
 
-        result.push(answer[answer.length-1]);
-    }
-    return result;
-}
+//         if(word.length === 0)
+//         {
+//             answer++;
+//         }
+//     }
 
-console.log(solution(3, [10, 100, 20, 150, 1, 100, 200]));
-//console.log(solution([1, 7, 1, 2]));
+//     return answer;
+// }
 
+
+// let check = "hello world hellohello";
+// console.log(check.slice(2));
+
+
+//JOIN을 이용한다는 사실을 까먹지 말고 기억하도록.
+// function solution(X, Y) {
+//     let answer = ''
+//     X = X.split("")
+//     Y = Y.split("")
+//     for(let i = 0 ; i < 10 ; i ++) {
+//         const curX = X.filter(a => Number(a) === i).length
+//         const curY = Y.filter(a => Number(a) === i).length
+//         answer+=String(i).repeat(Math.min(curX, curY))
+//         console.log(answer);
+//     }
+//     if(answer === '') return "-1"
+//     if(Number(answer) === 0) return "0"
+//     return answer.split("").sort((a,b) => Number(b)-Number(a)).join("")
+// }
+
+//console.log(solution("100","103045"));
+// let arr = [1,2,3,3,5,0];
+// let arr2 = [1,2,3, 6];
+// let result = arr.filter((element)=>arr2.includes(element));
+// console.log(result);
+
+// console.log(solution("5525","1255"));

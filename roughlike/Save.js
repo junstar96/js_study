@@ -3,6 +3,7 @@
 import { json } from "express";
 import fs from "fs";
 import path, { resolve } from "path";
+
 //현재 위치를 받아온다.
 const __dirname = path.resolve();
 const __logs = [];
@@ -101,7 +102,7 @@ function savejson(filename, data)
 
 }
 
-function rank_renewal(newdata)
+export function rank_renewal(newdata)
 {
     const filepath = path.join(__dirname, 'save', 'rank.json');
     let filedata = [];
@@ -119,7 +120,7 @@ function rank_renewal(newdata)
         }
     }
 
-    filedata.push(newData);
+    filedata.push(newdata);
 
     filedata.sort((a,b)=> b['point'] - a['point'])
     filedata = filedata.slice(0,5);
@@ -155,5 +156,6 @@ const newData =
     point : 1234
 }
 
-
+newData.point = 10000;
+console.log(newData);
 //rank_renewal(newData);

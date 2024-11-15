@@ -2,9 +2,15 @@ import chalk from 'chalk';
 import figlet from 'figlet';
 import readlineSync from 'readline-sync';
 import { getinputwithtimeout_without_ReadlineSync } from './readlinetest.js';
+import { rank_renewal } from './Save.js';
 
 
 export const wait = (timer) => new Promise((resolve) => { setTimeout(function () { resolve(null) }, timer); })
+const game_data = {
+  rank : 0,
+  name : "플레이어",
+  point : 0
+}
 
 //도망치면 아이템 획득은 할 수 없다.
 class Player {
@@ -477,6 +483,8 @@ const battle = async (level, stage, player, monster) => {
   let monster_input = 0;
   let turn_check = 3; 
 
+  game_data.rank = ((level-1) * 10 + stage);
+
   function logs_update() {
     logs = [];
   }
@@ -496,7 +504,7 @@ const battle = async (level, stage, player, monster) => {
     console.log(
       chalk.green(
         `1. 공격한다 2. 연속 공격(${player.attack_mag}%). 3. 방어한다(${player.defence}%).4. 도망친다. ` + 
-        (turn_check >= 3 ? chalk.cyanBright(` 5. 행동 캔슬 `) : chalk.gray(` 5. 행동 캔슬(딜레이) `)) + `시간 제한 : ${monster.time} 초`,
+        (turn_check >= 3 ? chalk.cyanBright(` 5. 행동 캔슬 `) : chalk.gray(` 5. 행동 캔슬(딜레이) `)) + `시간 제한 : ${monster.time} 초` + chalk.green(` 현재 점수 : ${game_data.point} 점`), 
       ),
     );
     //const choice = readlineSync.question('당신의 선택은? ');
@@ -530,6 +538,7 @@ const battle = async (level, stage, player, monster) => {
     switch (choice) {
       case '1':
         logs.push(monster.damaged(player.attack));
+        game_data.point += player.attack;
 
         switch (monster_input) {
           case 1:
@@ -550,10 +559,12 @@ const battle = async (level, stage, player, monster) => {
         logs.push(input_string);
         if (attack_point === 0) {
           logs.push(chalk.red(`${monster.name}이 공격을 회피했습니다.`));
+          game_data.point += 1;
         }
         else {
           logs.push(chalk.green(`총 ${attack_point}회 공격!`));
           logs.push(monster.damaged(player.attack * attack_point));
+          game_data.point += Math.ceil(player.attack * attack_point);
 
           switch (monster_input) {
             case 1:
@@ -572,6 +583,7 @@ const battle = async (level, stage, player, monster) => {
       case '3':
         if (player.Checking_Defence(monster.attack)) {
           logs.push(chalk.green(`크리티컬! 데미지를 입지 않았습니다.`));
+          game_data.point += 10;
         }
         else {
           switch (monster_input) {
@@ -586,7 +598,7 @@ const battle = async (level, stage, player, monster) => {
               logs.push(monster.nothing_worked());
               break;
           }
-
+          game_data.point += 5;
         }
         break;
       case '4':
@@ -629,6 +641,7 @@ const battle = async (level, stage, player, monster) => {
         {
           logs.push(chalk.blue(`상대의 행동을 캔슬시켰습니다!`));
           turn_check = 0;
+          game_data.point += 100;
           logs.push(monster.damaged(1));
         }
         break;
@@ -644,12 +657,17 @@ const battle = async (level, stage, player, monster) => {
 
     if (monster.hp <= 0) {
       console.log(`${monster.name}을(를) 쓰러트렸습니다.`)
+      console.log(`점수 + 1000`)
+      game_data.point += 1000;
       await wait(2000);
       break;
     }
 
     if (player.player_is_dying) {
       console.log(`플레이어가 사망했으므로 게임을 종료합니다.`)
+      rank_renewal(game_data);
+
+      console.log(`세이브 중.....`)
       await wait(5000);
       process.exit();
     }
