@@ -123,4 +123,53 @@
 
 
 
+function solution(answers) {
+    var answer = [];
+    let check1 = [1, 2, 3, 4, 5];
+    let check2 = [2, 1, 2, 3, 2, 4, 2, 5];
+    let check3 = [3, 3, 1, 1, 2, 2, 4, 4, 5, 5];
+    let count = [0,0,0];
+    
+    for(let i = 0;i<answers.length;i++)
+    {
+        console.log(answer[i],check1[i%check1.length],check2[i%check2.length],check3[i%check3.length]);
+        if(answer[i] === check1[i%check1.length])
+        {
+            count[0]++;
+        }
+        
+        if(answer[i] === check2[i%check2.length])
+        {
+            count[1]++;
+        }
+        
+        if(answer[i] === check3[i%check3.length])
+        {
+            count[2]++;
+        }
+    }
 
+    console.log(count[0],count[1],count[2]);
+    
+    let bignum = 0;
+    
+    for(let i = 0;i<3;i++)
+    {
+        if(count[i] > bignum)
+        {
+            bignum = count[i];
+        }
+    }
+    
+    for(let i = 0;i<3;i++)
+    {
+        if(count[i] === bignum)
+        {
+            answer.push(i+1);
+        }
+    }
+    
+    return answer;
+}
+
+console.log(solution([1,2,3,4,5]));
