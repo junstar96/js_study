@@ -123,53 +123,45 @@
 
 
 
-function solution(answers) {
+function solution(keymap, targets) {
     var answer = [];
-    let check1 = [1, 2, 3, 4, 5];
-    let check2 = [2, 1, 2, 3, 2, 4, 2, 5];
-    let check3 = [3, 3, 1, 1, 2, 2, 4, 4, 5, 5];
-    let count = [0,0,0];
     
-    for(let i = 0;i<answers.length;i++)
+    
+    for(let i = 0;i<targets.length;i++)
     {
-        console.log(answer[i],check1[i%check1.length],check2[i%check2.length],check3[i%check3.length]);
-        if(answer[i] === check1[i%check1.length])
+        let count = 0;
+        let break_point = false;
+        for(let j = 0;j<targets[i].length;j++)
         {
-            count[0]++;
-        }
-        
-        if(answer[i] === check2[i%check2.length])
-        {
-            count[1]++;
-        }
-        
-        if(answer[i] === check3[i%check3.length])
-        {
-            count[2]++;
-        }
-    }
+            let current_min = 101;
+            keymap.forEach(data=>{
+                current_min = data.indexOf(targets[i][j]) != -1 ? Math.min(data.indexOf(targets[i][j]), current_min) : current_min;
+            })
 
-    console.log(count[0],count[1],count[2]);
-    
-    let bignum = 0;
-    
-    for(let i = 0;i<3;i++)
-    {
-        if(count[i] > bignum)
-        {
-            bignum = count[i];
+            if(current_min === 101)
+            {
+                break_point = true;
+                break;
+            }
+            else
+            {
+                count += current_min + 1;
+            }
+
+            
         }
-    }
-    
-    for(let i = 0;i<3;i++)
-    {
-        if(count[i] === bignum)
+
+        if(break_point)
         {
-            answer.push(i+1);
+            answer[i] = -1;
+            continue;
         }
+        
+        answer[i] = count;
+        
     }
     
     return answer;
 }
 
-console.log(solution([1,2,3,4,5]));
+console.log(solution(["ABACD", "BCEFD"],	["ABCD","AABB"]))
