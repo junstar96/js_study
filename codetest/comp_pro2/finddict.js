@@ -43,5 +43,5 @@ function solution(word) {
 
 console.log(solution('UUUUU'));
 
-let checkword = [];
-console.log(checkword.join(''));
+// let checkword = [];
+// console.log(checkword.join(''));
