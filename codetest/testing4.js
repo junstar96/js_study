@@ -1,4 +1,10 @@
-let firsttest = /^[a-z]/;
-let check = ["helo","world"];
+let check = "1234567";
+let sol = [];
 
-console.log(check.join(' '));
+for(let i = 0;i<check.length;i++)
+{
+    sol.push(check[i] - '0');
+}
+
+console.log(sol);
+
