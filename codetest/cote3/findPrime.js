@@ -6,6 +6,7 @@ const isPrime = (n) => {
     return true;
 };
 
+//순열 
 const getPermutations = (arr, length) => {
     if (length === 1) return arr.map((v) => [v]);
     const permutations = [];
